@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>PE Coach Pro — F3 (Pro Max)</title>
+<meta name="theme-color" content="#0b1220"/>
+<link rel="manifest" href="manifest.json"/>
+<style>
+:root{
+  --bg:#0b1220;--panel:#0f172a;--ink:#e5e7eb;--muted:#9ca3af;
+  --acc:#22d3ee;--warm:#f97316;--ok:#10b981;--bad:#ef4444;--br:#334155;
+}
+:root[data-theme="light"]{
+  --bg:#f8fafc; --panel:#ffffff; --ink:#0f172a; --muted:#475569; --br:#e2e8f0;
+  --acc:#0077ff; --warm:#ea580c; --ok:#059669; --bad:#dc2626;
+}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,Segoe UI,Roboto}
+.wrap{max-width:1100px;margin:0 auto;padding:14px}
+header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,var(--bg),rgba(0,0,0,.0));backdrop-filter:saturate(160%) blur(2px)}
+h1{margin:0;font-size:20px}
+.badge{display:inline-block;background:linear-gradient(90deg,#3b82f6,#22d3ee);color:#001b2a;padding:8px 14px;border-radius:999px;font-weight:700}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:10px 14px;border:1px solid var(--br);background:var(--panel);border-radius:12px;color:var(--ink);cursor:pointer}
+.btn:hover{border-color:#64748b}
+.tabbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tab{padding:10px 14px;border:1px solid var(--br);border-radius:12px;background:var(--panel);color:var(--ink);cursor:pointer}
+.tab.active{outline:2px solid var(--acc)}
+.card{background:rgba(15,23,42,.05);border:1px solid var(--br);border-radius:16px;padding:14px;margin-top:14px}
+.grid{display:grid;gap:10px}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:920px){.g2,.g3{grid-template-columns:1fr}}
+label{display:block;margin:6px 0;color:var(--muted);font-size:13px}
+input,select,textarea{width:100%;padding:12px;background:color-mix(in oklab, var(--panel) 86%, transparent);
+  color:var(--ink);border:1px solid var(--br);border-radius:12px}
+input[type="checkbox"]{width:auto;transform:scale(1.2);accent-color:var(--acc)}
+.small{font-size:12px;color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.kpi{display:inline-block;background:var(--panel);border:1px solid var(--br);padding:8px 12px;border-radius:999px;margin:4px}
+.ok{color:var(--ok)} .bad{color:var(--bad)} .warm{color:var(--warm)}
+.table{width:100%;border-collapse:collapse} .table th,.table td{border-bottom:1px dashed var(--br);padding:10px;text-align:center}
+.hidden{display:none!important}
+.pinbox{position:fixed;inset:0;background:#0009;display:flex;align-items:center;justify-content:center;z-index:999}
+.box{background:var(--panel);border:1px solid var(--br);border-radius:18px;padding:16px;min-width:min(92vw,460px);color:var(--ink)}
+hr{border:none;border-top:1px solid var(--br);margin:10px 0}
+footer{padding:20px 0;color:#64748b;text-align:center}
+.hint{font-size:12px;color:var(--muted)}
+.sectionTitle{margin:0 0 6px;font-size:16px}
+.pill{display:inline-block;border:1px solid var(--br);border-radius:999px;padding:6px 10px;margin:2px}
+.progress{height:10px;background:color-mix(in oklab, var(--panel) 70%, transparent);border:1px solid var(--br);border-radius:999px;overflow:hidden}
+.progress>span{display:block;height:100%;background:linear-gradient(90deg,var(--acc),#22c55e)}
+.quote{font-size:13px;color:var(--muted);margin-top:6px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div>
+        <h1>PE Coach Pro <span class="badge">F3 Pro Max</span></h1>
+        <div id="motivate" class="quote"></div>
+      </div>
+      <div class="toolbar">
+        <button class="btn" id="themeBtn">ثيم نهاري/ليلي</button>
+        <button class="btn" id="pinBtn">تعيين/فتح PIN</button>
+        <button class="btn" id="backupBtn">نسخة احتياطية</button>
+        <button class="btn" id="updateBtn">تحديث قوي</button>
+      </div>
+    </div>
+    <div class="progress"><span id="dayProgress" style="width:0%"></span></div>
+    <div class="tabbar">
+      <button class="tab active" data-tab="today">اليوم</button>
+      <button class="tab" data-tab="log">السجل</button>
+      <button class="tab" data-tab="stats">الإحصائيات</button>
+      <button class="tab" data-tab="notes">الملاحظات</button>
+      <button class="tab" data-tab="settings">الإعدادات</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- اليوم -->
+  <section id="today" class="card">
+    <h3 class="sectionTitle">بيانات اليوم</h3>
+    <div class="grid g2">
+      <div>
+        <label>التاريخ</label>
+        <input id="d_date" type="date">
+      </div>
+      <div>
+        <label>خطوات المشي</label>
+        <input id="d_steps" type="number" min="0" value="0">
+      </div>
+      <div>
+        <label>دواء اليوم (قلق/سرعة القذف)</label>
+        <select id="d_med">
+          <option value="بدون">بدون</option>
+          <option value="Seroxat + Escitalopram">Seroxat + Escitalopram</option>
+          <option value="Seroxat فقط">Seroxat فقط</option>
+        </select>
+      </div>
+      <div>
+        <label>بروستاتا: Tadalafil 5mg</label>
+        <div class="row"><input id="d_tada" type="checkbox"><span class="small">تم تناوله اليوم</span></div>
+      </div>
+      <div>
+        <label>القلق (0–10)</label>
+        <input id="d_anx" type="number" min="0" max="10" value="0">
+      </div>
+      <div>
+        <label>النوم (0–10)</label>
+        <input id="d_sleep" type="number" min="0" max="10" value="0">
+      </div>
+      <div>
+        <label>التحكم (0–10)</label>
+        <input id="d_ctrl" type="number" min="0" max="10" value="0">
+      </div>
+      <div>
+        <label>المدة قبل القذف (دقائق)</label>
+        <input id="d_lat" type="number" min="0" value="0">
+      </div>
+      <div>
+        <label>تمت علاقة زوجية</label>
+        <div class="row"><input id="d_rel" type="checkbox"></div>
+      </div>
+      <div>
+        <label>إرخاء الحوض</label>
+        <div class="row"><input id="d_pelv" type="checkbox"></div>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:10px">
+      <div>
+        <label>ملاحظة العلاقة</label>
+        <textarea id="d_rel_note" rows="2" placeholder="مثال: تغيير وضع/ضغط…"></textarea>
+      </div>
+      <div>
+        <label>ملاحظة اليوم</label>
+        <textarea id="d_note" rows="2" placeholder="أي ملاحظة لليوم…"></textarea>
+      </div>
+    </div>
+
+    <hr>
+    <h4 class="sectionTitle">المكملات</h4>
+    <div id="suppToday" class="grid"></div>
+    <div class="row">
+      <input id="suppNewName" placeholder="اسم مكمل جديد (اختياري)">
+      <button class="btn" id="suppAddBtn">إضافة للمكتبة</button>
+      <button class="btn" id="suppSaveList">حفظ قائمة المكملات</button>
+    </div>
+
+    <hr>
+    <h4 class="sectionTitle">البرنامج غير الدوائي</h4>
+    <div id="habToday" class="grid"></div>
+    <div class="row">
+      <input id="habNewName" placeholder="أضف عادة غير دوائية">
+      <button class="btn" id="habAddBtn">إضافة عادة</button>
+    </div>
+
+    <hr>
+    <h4 class="sectionTitle">العادات الدينية</h4>
+    <div id="faithBox" class="grid"></div>
+
+    <hr>
+    <h4 class="sectionTitle">العادات المعرفية</h4>
+    <div class="grid g3">
+      <div><label>قراءة (صفحات)</label><input id="c_pages" type="number" min="0" value="0"></div>
+      <div><label>تعلّم (دقائق)</label><input id="c_learn" type="number" min="0" value="0"></div>
+      <div class="row" style="align-items:center;margin-top:22px"><input id="c_summary" type="checkbox"><span class="small">كتبت ملخص/ملاحظة</span></div>
+    </div>
+
+    <hr>
+    <h4 class="sectionTitle">العادات الاجتماعية</h4>
+    <div id="socialBox" class="grid"></div>
+
+    <hr>
+    <h4 class="sectionTitle">قسم مالي</h4>
+    <div class="grid g2">
+      <div><label>مصاريف اليوم (جنيه)</label><input id="m_spend" type="number" min="0" value="0"></div>
+      <div><label>ملاحظة مالية</label><input id="m_note" placeholder="فيما أنفقت؟"></div>
+    </div>
+    <div class="hint">تذكير: «تحكم في مصاريفك — حاول تخصيص 20% ادخار.»</div>
+
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="saveDay">حفظ اليوم</button>
+      <button class="btn" id="clearDay">تفريغ</button>
+    </div>
+  </section>
+
+  <!-- السجل -->
+  <section id="log" class="card hidden">
+    <h3 class="sectionTitle">السجل</h3>
+    <div class="row">
+      <select id="logRange">
+        <option value="30">آخر 30 يوم</option>
+        <option value="90">آخر 90 يوم</option>
+        <option value="all">الكل</option>
+      </select>
+      <button class="btn" id="csvBtn">تصدير CSV</button>
+      <button class="btn bad" id="delAll">حذف الكل</button>
+    </div>
+    <div id="logTableWrap" style="overflow:auto;margin-top:10px">
+      <table class="table" id="logTable"></table>
+    </div>
+  </section>
+
+  <!-- الإحصائيات -->
+  <section id="stats" class="card hidden">
+    <h3 class="sectionTitle">الإحصائيات</h3>
+    <div id="kpis"></div>
+    <canvas id="trend" height="220" style="width:100%"></canvas>
+  </section>
+
+  <!-- الملاحظات -->
+  <section id="notes" class="card hidden">
+    <h3 class="sectionTitle">الملاحظات</h3>
+    <div class="row">
+      <input id="noteText" placeholder="اكتب ملاحظة…">
+      <input id="noteTags" placeholder="وسوم (مثال: #قلق #تمارين)">
+      <button class="btn" id="noteAdd">إضافة</button>
+      <button class="btn" id="noteExport">تصدير</button>
+      <button class="btn" id="noteImport">استيراد</button>
+    </div>
+    <div id="noteList" class="card" style="margin-top:10px"></div>
+  </section>
+
+  <!-- الإعدادات -->
+  <section id="settings" class="card hidden">
+    <h3 class="sectionTitle">الإعدادات</h3>
+    <div class="row">
+      <button class="btn" id="refreshBtn">تحديث قوي (كسر كاش)</button>
+      <button class="btn" id="themeColorBtn">لون التمييز</button>
+      <span class="pill">الإصدار: <span id="ver"></span></span>
+    </div>
+    <div class="small">التطبيق يعمل محليًا فقط. لا يتم إرسال أي بيانات.</div>
+  </section>
+</main>
+
+<!-- PIN Modal -->
+<div id="pinModal" class="pinbox hidden">
+  <div class="box">
+    <h3 style="margin:0 0 10px">أدخل/غيّر PIN</h3>
+    <div class="grid g2">
+      <div><label>(اختياري) PIN جديد</label><input id="pinNew" type="password" inputmode="numeric" maxlength="8" placeholder="حتى 8 أرقام"></div>
+      <div><label>PIN لفتح</label><input id="pinOpen" type="password" inputmode="numeric" maxlength="8" placeholder="أدخل الرقم الحالي"></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn" id="pinEnter">فتح</button>
+      <button class="btn" id="pinSave">تعيين/تغيير</button>
+      <button class="btn" id="pinClose">إغلاق</button>
+    </div>
+    <div id="pinMsg" class="small bad" style="margin-top:6px"></div>
+  </div>
+</div>
+
+<footer class="wrap small">© PE Coach Pro — يعمل محليًا | F3</footer>
+
+<!-- Loader -->
+<script>
+(function(){
+  const VERSION='F3';
+  document.getElementById('ver').textContent = VERSION;
+  try{ localStorage.setItem('pe_version', VERSION); }catch(e){}
+  const s=document.createElement('script');
+  s.src='Script.js?v='+encodeURIComponent(VERSION)+'-'+Date.now();
+  s.defer=true;
+  s.onload=function(){ try{ window.PE && window.PE.init && window.PE.init(VERSION); }catch(e){} };
+  document.head.appendChild(s);
+  // تحديث قوي
+  document.addEventListener('DOMContentLoaded',()=>{
+    const r=document.querySelector('#refreshBtn');
+    if(!r) return;
+    r.addEventListener('click', async ()=>{
+      try{
+        if('caches' in window){ const ks=await caches.keys(); await Promise.all(ks.map(k=>caches.delete(k))); }
+        if('serviceWorker' in navigator){ const reg=await navigator.serviceWorker.getRegistration(); if(reg) await reg.unregister(); }
+      }catch(e){}
+      const u=new URL(location.href); u.searchParams.set('v', VERSION+'-'+Date.now()); location.replace(u.toString());
+    });
+  });
+})();
+</script>
+
+<!-- Register simple offline service worker -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+</script>
+
+</body>
+</html>
